@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 TechGuard – Threat Intelligence Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-dark text-light">
+  <div class="container py-4">
+    <h1 class="text-center mb-4">🧠 TechGuard – Threat Intelligence Dashboard</h1>
+
+    <div class="input-group mb-3">
+      <input id="search" type="text" class="form-control" placeholder="Search CVE (e.g. Windows, Cisco, Apache)" />
+      <button id="searchBtn" class="btn btn-primary">Search</button>
+    </div>
+
+    <div id="loader" class="text-center py-4">
+      <div class="spinner-border text-light" role="status"></div>
+    </div>
+
+    <canvas id="chart" width="400" height="150" class="mb-4"></canvas>
+
+    <div id="results" class="row g-3"></div>
+  </div>
+
+  <script>
+    const loader = document.getElementById("loader");
+    const results = document.getElementById("results");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("search");
+
+    async function loadCVE() {
+      loader.style.display = "block";
+      results.innerHTML = "";
+      const res = await fetch("/api/cve");
+      const data = await res.json();
+      loader.style.display = "none";
+      displayResults(data);
+      updateChart(data);
+    }
+
+    async function searchCVE() {
+      const q = searchInput.value.trim();
+      if (!q) return loadCVE();
+      loader.style.display = "block";
+      results.innerHTML = "";
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      loader.style.display = "none";
+      displayResults(data);
+      updateChart(data);
+    }
+
+    function displayResults(cves) {
+      if (!cves || cves.length === 0) {
+        results.innerHTML = "<p class='text-center text-muted'>No CVE found.</p>";
+        return;
+      }
+
+      results.innerHTML = cves
+        .map(
+          (cve) => `
+        <div class="col-md-6 col-lg-4">
+          <div class="card bg-secondary text-light h-100 shadow">
+            <div class="card-body">
+              <h5 class="card-title">${cve.id}</h5>
+              <p class="card-text small">${(cve.summary || "No description").slice(0, 150)}...</p>
+              <span class="badge bg-${getSeverityColor(cve.cvss)}">
+                CVSS: ${cve.cvss || "N/A"}
+              </span>
+              <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=${cve.id}" target="_blank" class="btn btn-sm btn-light mt-2">View Details</a>
+            </div>
+          </div>
+        </div>`
+        )
+        .join("");
+    }
+
+    function getSeverityColor(cvss) {
+      const score = parseFloat(cvss);
+      if (isNaN(score)) return "secondary";
+      if (score >= 9) return "danger";
+      if (score >= 7) return "warning";
+      if (score >= 4) return "info";
+      return "success";
+    }
+
+    // --- Nouveau : graphique sur 24h ---
+    function updateChart(cves) {
+      const now = new Date();
+      const hours = Array.from({ length: 24 }, (_, i) => (i < 10 ? "0" + i : i) + ":00");
+      const counts = Array(24).fill(0);
+
+      cves.forEach(cve => {
+        const pubDate = new Date(cve.published || cve.lastModified || now);
+        const diffHours = Math.floor((now - pubDate) / (1000 * 60 * 60));
+        if (diffHours < 24) {
+          const hourIndex = 23 - diffHours;
+          counts[hourIndex]++;
+        }
+      });
+
+      const ctx = document.getElementById("chart").getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: hours,
+          datasets: [{
+            label: "CVE published in the last 24h",
+            data: counts,
+            borderColor: "#00ffff",
+            backgroundColor: "rgba(0,255,255,0.2)",
+            tension: 0.3
+          }]
+        },
+        options: {
+          scales: {
+            x: { ticks: { color: "#ccc" } },
+            y: { ticks: { color: "#ccc" }, beginAtZero: true }
+          },
+          plugins: {
+            legend: { labels: { color: "#fff" } }
+          }
+        }
+      });
+    }
+
+    searchBtn.addEventListener("click", searchCVE);
+    loadCVE();
+  </script>
+</body>
+</html>
