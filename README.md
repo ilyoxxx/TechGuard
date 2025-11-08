@@ -138,3 +138,4 @@ and you **cannot modify or redistribute** it.
 Support mail : contact@ilyox.fr
 ou serveur discord : https://discord.gg/DKNYmxbCCd
 
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
