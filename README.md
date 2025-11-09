@@ -31,19 +31,6 @@ Ce projet a pour but de fournir un outil de **Threat Intelligence** simple, mode
 ✅ Facile à héberger (Render, Replit, VPS, etc.)
 
 ---
-
-## 🧩 Technologies utilisées
-
-| Catégorie | Outil |
-|------------|--------|
-| **Backend** | Node.js + Express |
-| **Frontend** | HTML5, CSS3, Bootstrap 5 |
-| **Graphiques** | Chart.js |
-| **API** | [NVD CVE API v2.0](https://services.nvd.nist.gov/rest/json/cves/2.0) |
-| **Autres** | dotenv, node-fetch (si besoin de compatibilité Node <18) |
-
----
-
 ## 🧩 Technologies utilisées  
 
 | Catégorie | Technologie |
