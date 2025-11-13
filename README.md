@@ -1,5 +1,5 @@
 
-![Logo](https://media.discordapp.net/attachments/1426655400568033403/1436830277509845254/ChatGPT_Image_8_nov._2025_22_11_56.png?ex=691107f9&is=690fb679&hm=2a7fc90520fc5f7f4b38dfed8b444570dca442dcf321e80359257a8358297208&=&format=webp&quality=lossless&width=1376&height=917)
+![Logo](./techguard.png)
 
 
 ## Authors
